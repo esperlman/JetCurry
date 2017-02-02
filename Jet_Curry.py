@@ -26,13 +26,14 @@ def imagesqrt(image, scale_min, scale_max):
    imageData = np.sqrt(imageData)
    imageData = imageData / math.sqrt(scale_max - scale_min)
    return imageData
-def Find_MaxFlux(file1,Upstream_Bounds,number_of_points):
+def Find_MaxFlux(file1,Upstream_Bounds,Downstream_Bounds,number_of_points):
     height, width=file1.shape
     intensity_max=[]
     intensity_ypos=[]
     intensity_xpos=[]
     temp=np.zeros(shape=(height,1))
-    for k in range(int(Upstream_Bounds[0]),86-1):
+
+    for k in range(int(Upstream_Bounds[0]),int(Downstream_Bounds[0])-1):
         for j in range(int(Upstream_Bounds[1]),height-1):
             pixel=file1[j,k]
             temp[j]=pixel
@@ -46,7 +47,7 @@ def Find_MaxFlux(file1,Upstream_Bounds,number_of_points):
     intensity_xpos=np.array(intensity_xpos)
     x=intensity_xpos
     y=intensity_ypos
-    x_smooth=np.linspace(Upstream_Bounds[1],width,num=number_of_points)
+    x_smooth=np.linspace(Upstream_Bounds[1], Downstream_Bounds[1],num=number_of_points)
     y_smooth = spline(x, y, x_smooth)
     return x,y,x_smooth,y_smooth,intensity_max
 def Calculate_s_and_eta(x_smooth,y_smooth,core_points):
