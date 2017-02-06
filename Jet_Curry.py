@@ -34,7 +34,7 @@ def Find_MaxFlux(file1,Upstream_Bounds,Downstream_Bounds,number_of_points):
     temp=np.zeros(shape=(height,1))
 
     for k in range(int(Upstream_Bounds[0]),int(Downstream_Bounds[0])-1):
-        for j in range(int(Upstream_Bounds[1]),height-1):
+        for j in range(0,height-1):
             pixel=file1[j,k]
             temp[j]=pixel
         pixel_max=max(temp)
