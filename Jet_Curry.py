@@ -32,12 +32,11 @@ def Find_MaxFlux(file1,Upstream_Bounds,Downstream_Bounds,number_of_points):
     intensity_ypos=[]
     intensity_xpos=[]
     temp=np.zeros(shape=(height,1))
-
-    for k in range(int(Upstream_Bounds[0]),int(Downstream_Bounds[0])-1):
+    for k in range(int(Upstream_Bounds[1]),int(Downstream_Bounds[1])-1):
         for j in range(0,height-1):
             pixel=file1[j,k]
             temp[j]=pixel
-        pixel_max=max(temp)
+        pixel_max=np.nanmax(temp)
         position=[i for i, j in enumerate(temp) if j == pixel_max] 
         intensity_max.append(pixel_max)
         intensity_ypos.append(position[0])
@@ -47,15 +46,15 @@ def Find_MaxFlux(file1,Upstream_Bounds,Downstream_Bounds,number_of_points):
     intensity_xpos=np.array(intensity_xpos)
     x=intensity_xpos
     y=intensity_ypos
-    x_smooth=np.linspace(Upstream_Bounds[1], Downstream_Bounds[1],num=number_of_points)
+    x_smooth=np.linspace(Upstream_Bounds[1],Downstream_Bounds[1],num=number_of_points)
     y_smooth = spline(x, y, x_smooth)
     return x,y,x_smooth,y_smooth,intensity_max
 def Calculate_s_and_eta(x_smooth,y_smooth,core_points):
     s=[]
     eta=[]
     for i in range(len(x_smooth)):
-        x=x_smooth[i]-float(core_points[0])
-        y=y_smooth[i]-float(core_points[1])
+        x=x_smooth[i]-float(core_points[1])
+        y=y_smooth[i]-float(core_points[0])
         s_value=(x**2+y**2)**(0.5)
         eta_value=math.atan(y/x)
         s.append(s_value)
