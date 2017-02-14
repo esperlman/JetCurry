@@ -50,10 +50,12 @@ theta=0.261799388
 nameofknots='KnotD_Radio'
 filename=nameofknots+'.fits'
 #### Position of end point on image for fit
+### Note: Image must be input coordinates of (y,x)
 Downstream_Bounds=np.array([193,36]) 
 #### Position of starting point on image for fit
+### Note: Image must be input coordinates of (y,x)
 Upstream_Bounds=np.array([6,36]) 
-number_of_points=Downstream_Bounds[0]-Upstream_Bounds[0]
+number_of_points=Downstream_Bounds[1]-Upstream_Bounds[1]
 
 #### If you do not know the pixel position of the upstream, downstream
 #### See Note Above.
