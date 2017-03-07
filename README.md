@@ -1,5 +1,9 @@
-# JetCurry
-Last Edited: Dec 2016 Questions: Contact Katie Kosak, katie.kosak@gmail.com
+JetCurry, Copyright 2017. Katie Kosak.
+
+Copyright Details: GPL.txt 
+
+
+Last Edited: March 2017. Questions: Contact Katie Kosak, katie.kosak@gmail.com
 
 Python code that models the 3D geometry of AGN jets
 
@@ -24,3 +28,4 @@ where jet tells the code to pull the function from the code Jet_Curry. Find_MaxF
 For the functions in Jet_Curry, all arguments must be included as the example.
 
 To use the Jet_Curry Visualization with VPython, Recommend using Jupyter's IPython Notebooks.
+
