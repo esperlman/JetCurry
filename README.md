@@ -1,5 +1,4 @@
-JetCurry, Copyright 2017. Katie Kosak.
-
+JetCurry, Copyright 2017. Katie Kosak. Eric Perlman. 
 Copyright Details: GPL.txt 
 
 
