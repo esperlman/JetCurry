@@ -1,117 +1,161 @@
-#    Copyright 2017, Katie Kosak, Eric Perlman
-#    JETCURRY is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+'''
+Copyright 2017, Katie Kosak, Eric Perlman
+JETCURRY is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-#    You should have received a copy of the GNU General Public License
-#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-__author__="Katie Kosak"
-__email__="katie.kosak@gmail.com"
-__credits__=["KunYang Li", "Dr. Eric Perlman", "Dr.Sayali Avachat"]
-__status__="production"
-from scipy import array
-import pyfits
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+__author__ = "Katie Kosak"
+__email__ = "katie.kosak@gmail.com"
+__credits__ = ["KunYang Li", "Dr. Eric Perlman", "Dr.Sayali Avachat"]
+__status__ = "production"
+import imp
+import os
+from astropy.io import fits
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from pylab import *
-from matplotlib import *
 import Jet_Curry as jet
-from scipy.interpolate import spline
-######################## Notes #######################################
-#### Make sure in code to have the following python packages installed
-#### This can be done with pip install in terminal
-#### emcee, corner, multiprocessing, scipy, numpy, pyfits,matplotlib
-#### math, numpy, pylab
-####
-#### A Better Description for the code is included in ReadME on github
+import argparse
+import glob
+import Jet_Curry_Gui
 
-#### Line's with 4 #'s is instructions/comments
-#### Line's with 1 # is optional/alternative code to use if User wishes
-#######################################################################
+# Required modules
+MODULES = ['emcee',
+		   'corner',
+		   'multiprocessing',
+		   'scipy',
+		   'numpy',
+		   'astropy',
+		   'matplotlib',
+		   'math',
+		   'numpy',
+		   'pylab',
+		   'argparse',
+		   'glob']
 
-#### Open the image from fits file 
-#### Obtain image parameters
-#### Image will read in a NASA standard fits file
-#### If you do not know the pixel position of the upstream, downstream bounds,
-#### You can either plot the image with the commented out code and manually 
-#### include it in the code. 
-#filename='File_Name.fits'
-#file1=pyfits.getdata(filename)
-#plt.imshow(file1)
-#plt.show()
-#### Or you can use ginput below
-#filename='AB.fits'
-#file1=pyfits.getdata(filename)
-#plt.imshow(file1)
-#Bounds=plt.ginput(2) 
-####Make sure the mouse clicks Upstream -> Downstream
-####then replace Bounds lines of code to:
-####Comment out the other Upstream/Downstream Bounds if you do. 
-#Upstream_Bounds=Bounds[0]
-#Downstream_Bounds=Bounds[1]
+'''
+Try to import required modules.
+If a module can't be imported then print module name and exit
+'''
+missingModules = []
+
+for module in MODULES:
+	try:
+		imp.find_module(module)
+	except:
+		missingModules.append(module)
+
+if missingModules:
+	print('Modules ' + ', '.join(missingModules) + ' not installed')
+	os.sys.exit()
+
+# Create command line argument parser
+parser = argparse.ArgumentParser(description="Jet Curry")
+parser.add_argument('input', help='file or folder name')
+parser.add_argument('-out_dir', help='output directory path')
+args = parser.parse_args()
+
+'''
+Determine whether input is a single file or directory
+Create list of FITS files for processing
+'''
+files = []
+if os.path.isfile(args.input):
+	try:
+		fits.PrimaryHDU.readfrom(args.input)
+		files.append(args.input)
+	except:
+		print('%s is not a valid FITS file!' % args.input)
+		os.sys.exit()
+else:
+	if os.path.exists(args.input):
+		for file in glob.glob(args.input + '/*.fits'):
+			try:
+				fits.PrimaryHDU.readfrom(file)
+				files.append(file)
+			except:
+				print('%s is not a valid FITS file!' % file)
+	else:
+		print('Input directory does not exist!')
+
+# Create output directory if it doesn't exitst
+if args.out_dir is not None:
+	if not os.path.exists(args.out_dir):
+		try:
+			os.makedirs(args.out_dir)
+		except BaseException:
+			print('%s does not exist and cannot be created' % args.out_dir)
+else:
+	args.out_dir = os.getcwd()
+
+output_directory = args.out_dir + '/'
+
 np.seterr(all='ignore')
-s=[]
-eta=[]
-#### Line of Sight (radians)
-theta=0.261799388 
-nameofknots='KnotD_Radio'
-filename=nameofknots+'.fits'
-#### Position of end point on image for fit
-### Note: Image must be input coordinates of (y,x)
-Downstream_Bounds=np.array([193,36]) 
-#### Position of starting point on image for fit
-### Note: Image must be input coordinates of (y,x)
-Upstream_Bounds=np.array([6,36]) 
-number_of_points=Downstream_Bounds[1]-Upstream_Bounds[1]
+s = []
+eta = []
+# Line of Sight (radians)
+THETA = 0.261799388
 
-#### If you do not know the pixel position of the upstream, downstream
-#### See Note Above.
-nameofknots='AB'
-filename=nameofknots+'.fits'
 
-####  Obtain Information from the Image/Show the Image
-file1=pyfits.getdata(filename)
-pixel_min=np.nanmin(file1)
-pixel_maxima=np.nanmax(file1)
-#### Square Root Scaling for fits image
-file1=jet.imagesqrt(file1,pixel_min,pixel_maxima) 
-plt.imshow(file1)
+for file in files:
+	filename = os.path.splitext(file)[0]
+	filename = os.path.basename(filename)
+	output_directory = output_directory + filename + '/'
+	if not os.path.exists(output_directory):
+		os.makedirs(output_directory)
 
-#### Go column by column to calculate the max flux for each column
-x,y,x_smooth,y_smooth,intensity_max=jet.Find_MaxFlux(file1,Upstream_Bounds,Downstream_Bounds,number_of_points)
+	curry = Jet_Curry_Gui.Jet_Curry_Gui(file)
+	UPSTREAM_BOUNDS = np.array([curry.xStartVariable.get(), curry.yStartVariable.get()])
+	DOWNSTREAM_BOUNDS = np.array([curry.xEndVariable.get(), curry.yEndVariable.get()])
+	NUMBER_OF_POINTS = DOWNSTREAM_BOUNDS[0] - UPSTREAM_BOUNDS[0]
 
-#### Plot the Max Flux over the Image
-plt.contour(file1,10, cmap='gray')
-plt.scatter(x_smooth,y_smooth,c='b')
-plt.scatter(x,y,c='b')
-plt.title('Outline of Jet Stream')
-ax = plt.gca()
-ax.invert_yaxis()
-plt.show()
+	pixel_min = np.nanmin(curry.fits_data)
+	pixel_max = np.nanmax(curry.fits_data)
 
-#### Calculate the s and eta values
-#### s,eta, x_smooth,y_smooth values will 
-#### be stored in parameters.txt file
+	# Square Root Scaling for fits image
+	data = jet.imagesqrt(curry.fits_data, pixel_min, pixel_max)
+	plt.imshow(data)
 
-s,eta=jet.Calculate_s_and_eta(x_smooth,y_smooth,Upstream_Bounds)
-#### Run the First MCMC Trial in Parallel
-jet.MCMC1_Parallel(s,eta,theta)
-jet.MCMC2_Parallel(s,eta,theta)
-#### Run Simulated Annealing to guarantee Real Solution
-jet.Annealing1_Parallel(s,eta,theta)
-jet.Annealing2_Parallel(s,eta,theta) 
-x_coordinates,y_coordinates,z_coordinates=jet.Convert_Results_Cartesian(s,eta,theta)
+	# Go column by column to calculate the max flux for each column
+	x, y, x_smooth, y_smooth, intensity_max = jet.Find_MaxFlux(data, UPSTREAM_BOUNDS, DOWNSTREAM_BOUNDS, NUMBER_OF_POINTS)
 
-#### Plot the Results on Image   
-plt.scatter(x_coordinates,y_coordinates,c='y')
-plt.scatter(x_smooth,y_smooth,c='r')
-ax = plt.gca()
-ax.invert_yaxis()
-plt.show()
+	# Plot the Max Flux over the Image
+	plt.contour(data, 10, cmap='gray')
+	plt.scatter(x_smooth, y_smooth, c='b')
+	plt.scatter(x, y, c='b')
+	plt.title('Outline of Jet Stream')
+	ax = plt.gca()
+	ax.invert_yaxis()
+	plt.show()
+	plt.savefig(output_directory + filename + '_contour.png')
+
+	# Calculate the s and eta values
+	# s,eta, x_smooth,y_smooth values will
+	# be stored in parameters.txt file
+
+	s, eta = jet.Calculate_s_and_eta(x_smooth, y_smooth, UPSTREAM_BOUNDS, output_directory, filename)
+	# Run the First MCMC Trial in Parallel
+	jet.MCMC1_Parallel(s, eta, THETA, output_directory, filename)
+	jet.MCMC2_Parallel(s, eta, THETA, output_directory, filename)
+	# Run Simulated Annealing to guarantee Real Solution
+	jet.Annealing1_Parallel(s, eta, THETA, output_directory, filename)
+	jet.Annealing2_Parallel(s, eta, THETA, output_directory, filename)
+	x_coordinates, y_coordinates, z_coordinates = jet.Convert_Results_Cartesian(
+	    s, eta, THETA, output_directory, filename)
+
+	# Plot the Results on Image
+	plt.scatter(x_coordinates, y_coordinates, c='y')
+	plt.scatter(x_smooth, y_smooth, c='r')
+	ax = plt.gca()
+	ax.invert_yaxis()
+	plt.show()

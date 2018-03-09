@@ -18,7 +18,7 @@ import Jet_Curry as jet
 
 To use the functions necessary for the calculations, use the following:
 
-jet.Find_MaxFlux(file1,Upstream_Bounds,number_of_points)
+jet.Find_MaxFlux(file1, Upstream_Bounds, Downstream_Bounds, number_of_points)
 
 To execute the code, execute the Jet_Curry_Main.py code as a normal Python code. If the Jet_Curry.pyc file is in the same directory as Jet_Curry_Main, the functions will be automatically imported.
 
