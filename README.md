@@ -20,10 +20,8 @@ python Jet_Curry_Main.py input [-out_dir]
 **-out\_dir**: full or relative path to save output files.  Output directory is created if it doesn't exist. Default output is current working directory if -out\_dir is not specified. 
 
 **Example**
-> single file
-> input python Jet\_Curry\_Main.py ./KnotD\_Radio.fits
+> python Jet\_Curry\_Main.py ./KnotD\_Radio.fits
 
-> input directory with specificed output
 >  python Jet_Curry_Main.py ./data -out_dir /foo/bar/
 
 ## Notes
