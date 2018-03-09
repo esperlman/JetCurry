@@ -124,7 +124,7 @@ for file in files:
 
 	# Square Root Scaling for fits image
 	data = jet.imagesqrt(curry.fits_data, pixel_min, pixel_max)
-	plt.imshow(data)
+	# plt.imshow(data)
 
 	# Go column by column to calculate the max flux for each column
 	x, y, x_smooth, y_smooth, intensity_max = jet.Find_MaxFlux(data, UPSTREAM_BOUNDS, DOWNSTREAM_BOUNDS, NUMBER_OF_POINTS)
@@ -136,8 +136,9 @@ for file in files:
 	plt.title('Outline of Jet Stream')
 	ax = plt.gca()
 	ax.invert_yaxis()
-	plt.show()
+	# plt.show()
 	plt.savefig(output_directory + filename + '_contour.png')
+	plt.clf()
 
 	# Calculate the s and eta values
 	# s,eta, x_smooth,y_smooth values will
@@ -158,4 +159,5 @@ for file in files:
 	plt.scatter(x_smooth, y_smooth, c='r')
 	ax = plt.gca()
 	ax.invert_yaxis()
-	plt.show()
+	# plt.show()
+	plt.savefig(output_directory + filename + '_sim.png')

@@ -13,9 +13,11 @@ class Jet_Curry_Gui():
         self.gui.title('FITS Image')
         self.file = file
 
+        # Frame to display the image
         self.masterFrame = Frame(self.gui, height=50, width=50)
         self.masterFrame.grid(row=0, column=0)
 
+        # Interactive frame to choose streams and display values
         self.iFrame = Frame(self.gui, height=50, width=50)
         self.iFrame.grid(row=1, column=0)
 
@@ -76,7 +78,9 @@ class Jet_Curry_Gui():
         self.photo = ImageTk.PhotoImage(self.img)
         self.panel = Label(self.masterFrame, image=self.photo)
         self.clicks = list(range(2))
+        # Left mouse click for upstream (start)
         self.panel.bind('<Button-1>', self.get_start_point)
+        # Right mouse click for downstream (end)
         self.panel.bind('<Button-2>', self.get_end_point)
         self.panel.grid(row=1, column=0)
 
