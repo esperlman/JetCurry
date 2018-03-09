@@ -9,7 +9,7 @@ Last Edited: March 2018. Questions: Contact Katie Kosak,  [katie.kosak@gmail.com
 
 ## Usage
 
-python Jet_Curry_Main.py input [-out_dir] 
+python JetCurryMain.py input [-out_dir] 
 
 **Required arguments**
 
@@ -20,9 +20,9 @@ python Jet_Curry_Main.py input [-out_dir]
 **-out\_dir**: full or relative path to save output files.  Output directory is created if it doesn't exist. Default output is current working directory if -out\_dir is not specified. 
 
 **Example**
-> python Jet\_Curry\_Main.py ./KnotD\_Radio.fits
+> python JetCurryMain.py ./KnotD\_Radio.fits
 
->  python Jet_Curry_Main.py ./data -out_dir /foo/bar/
+>  python JetCurryMain.py ./data -out_dir /foo/bar/
 
 ## Notes
 

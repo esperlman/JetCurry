@@ -21,32 +21,30 @@ from scipy.interpolate import spline
 import emcee
 from scipy.optimize import fmin_l_bfgs_b
 from multiprocessing import Process
-
 import warnings
 warnings.filterwarnings("ignore")
 
 np.seterr(all='ignore')
 
-# def lnprob(v):
-#     alpha, beta, phi, xi, d = v
-#     model = (((s * np.sin(eta)) / np.sin(phi))**2 + (s * np.cos(eta) * (np.sin(theta) * np.cos(alpha) + np.sin(alpha) * np.cos(theta)) / np.cos(alpha))**2 - d**2)**2 + (((np.sin(beta) * np.cos(alpha)) / (np.sin(alpha) * np.cos(beta)))**2 - (np.cos(eta)**2))**2 + (d * np.cos(xi) * np.cos(theta) - ((s * np.cos(eta) * np.sin(alpha)) / np.cos(alpha)) - d * np.sin(xi) * np.cos(phi) * np.sin(theta))**2 + ((np.sin(eta) / np.cos(eta)) - ((np.sin(xi) * np.sin(phi)) / (np.cos(xi) * np.sin(theta) + np.sin(xi) * np.cos(phi) * np.cos(theta))))**2 + (s - d * np.cos(beta))**2
-#     lnlike = -np.log(np.abs(model) + 1)
-
-#     if 0 < alpha < 1.57 and 0 < beta < 1.57 and 0 < phi < 3.14 and 0 < xi < t and floor(s) < d < floor(s) + 3 * 20.25:
-#         lp = 0.0
-#     else:
-#         lp = np.inf
-
-#     if not np.isfinite(lp):
-#         return -np.inf
-#     else:
-#         return lp + lnlike
-
-
 def imagesqrt(image, scale_min, scale_max):
-        # Algorithm Courtesy of Min-Su Shin (msshin @ umich.edu)
-        # Modified by Katie Kosak 07/02/2015 to fit the needs
-        # of Hubble Data for Dr. Perlman and Dr. Avachat
+    '''
+    Algorithm Courtesy of Min-Su Shin (msshin @ umich.edu)
+    Modified by Katie Kosak 07/02/2015 to fit the needsof Hubble Data for
+    Dr. Perlman and Dr. Avachat.
+
+    Arguments:
+        image : numpy array
+            FITS image
+        scale_min : float
+            Minimum scale
+        scale_max : float
+            Maximum scale
+
+    Returns:
+        imageData : numpy array
+            Square root scale of image
+
+    '''
     imageData = np.array(image, copy=True)
     imageData = imageData - scale_min
     indices = np.where(imageData < 0)
@@ -91,6 +89,8 @@ def Find_MaxFlux(file1, Upstream_Bounds, Downstream_Bounds, number_of_points):
 
 
 def Calculate_s_and_eta(x_smooth, y_smooth, core_points, output_directory, filename):
+    '''
+    '''
     s = []
     eta = []
     for i in range(len(x_smooth)):
@@ -108,6 +108,8 @@ def Calculate_s_and_eta(x_smooth, y_smooth, core_points, output_directory, filen
 
 
 def Run_MCMC1(s, eta, theta, ind, output_directory, filename):
+    '''
+    '''
     ndim, nwalkers, nsteps = 5, 1024, 50
     initial_alpha = np.arange(0, 2.0, 0.5)
     initial_beta = np.arange(0, 2.0, 0.5)
@@ -129,6 +131,8 @@ def Run_MCMC1(s, eta, theta, ind, output_directory, filename):
                         pos.append(init)
 
     def lnlike(v):
+        '''
+        '''
         alpha, beta, phi, xi, d = v
         model = (((s * np.sin(eta)) / np.sin(phi))**2 + (s * np.cos(eta) * (np.sin(theta) * np.cos(alpha) + np.sin(alpha) * np.cos(theta)) / np.cos(alpha))**2 - d**2)**2 + (((np.sin(beta) * np.cos(alpha)) / (np.sin(alpha) * np.cos(beta)))**2 - (np.cos(eta)**2))**2 + (d * np.cos(xi) * np.cos(theta) - ((s * np.cos(eta) * np.sin(alpha)) / np.cos(alpha)) - d * np.sin(xi) * np.cos(phi) * np.sin(theta))**2 + ((np.sin(eta) / np.cos(eta)) - ((np.sin(xi) * np.sin(phi)) / (np.cos(xi) * np.sin(theta) + np.sin(xi) * np.cos(phi) * np.cos(theta))))**2 + (s - d * np.cos(beta))**2
         return -np.log(np.abs(model) + 1)
@@ -136,12 +140,16 @@ def Run_MCMC1(s, eta, theta, ind, output_directory, filename):
     t = 1.5708 - theta
 
     def lnprior(v):
+        '''
+        '''
         alpha, beta, phi, xi, d = v
         if 0 < alpha < 1.57 and 0 < beta < 1.57 and 0 < phi < 3.14 and 0 < xi < t and floor(s) < d < floor(s) + 3 * 20.25:
             return 0.0
         return np.inf
 
     def lnprob(v):
+        '''
+        '''
         lp = lnprior(v)
         if not np.isfinite(lp):
             return -np.inf
@@ -174,6 +182,8 @@ def Run_MCMC1(s, eta, theta, ind, output_directory, filename):
 
 
 def MCMC1_Parallel(s, eta, theta, output_directory, filename):
+    '''
+    '''
     for i in range(0, int(len(s) - 3.0), 4):
         r = Process(target=Run_MCMC1, args=(s[i], eta[i], theta, i, output_directory, filename))
         r.start()
@@ -195,6 +205,8 @@ def MCMC1_Parallel(s, eta, theta, output_directory, filename):
 
 
 def RunMCMC2(s, eta, d0, theta, a, b, c, e, ind, output_directory, filename):
+    '''
+    '''
     initial_alpha = np.arange(a, a + 0.2, 0.05)
     initial_beta = np.arange(b, b + 0.2, 0.05)
     initial_phi = np.arange(c, c + 0.2, 0.05)
@@ -218,6 +230,8 @@ def RunMCMC2(s, eta, d0, theta, a, b, c, e, ind, output_directory, filename):
     ndim, nwalkers, nsteps = 5, float(shape(pos)[0]), 50
 
     def lnlike(v):
+        '''
+        '''
         alpha, beta, phi, xi, d = v
         model = (((s * np.sin(eta)) / np.sin(phi))**2 + (s * np.cos(eta) * (np.sin(theta) * np.cos(alpha) + np.sin(alpha) * np.cos(theta)) / np.cos(alpha))**2 - d**2)**2 + (((np.sin(beta) * np.cos(alpha)) / (np.sin(alpha) * np.cos(beta)))**2 - (np.cos(eta)**2))**2 + (d * np.cos(xi) * np.cos(theta) - ((s * np.cos(eta) * np.sin(alpha)) / np.cos(alpha)) - d * np.sin(xi) * np.cos(phi) * np.sin(theta))**2 + ((np.sin(eta) / np.cos(eta)) - ((np.sin(xi) * np.sin(phi)) / (np.cos(xi) * np.sin(theta) + np.sin(xi) * np.cos(phi) * np.cos(theta))))**2 + (s - d * np.cos(beta))**2
         return -np.log(np.abs(model) + 1)
@@ -225,6 +239,8 @@ def RunMCMC2(s, eta, d0, theta, a, b, c, e, ind, output_directory, filename):
     t = 1.5708 - theta
 
     def lnprior(v):
+        '''
+        '''
         alpha, beta, phi, xi, d = v
         if a < alpha < (
                 a +
@@ -242,6 +258,8 @@ def RunMCMC2(s, eta, d0, theta, a, b, c, e, ind, output_directory, filename):
         return np.inf
 
     def lnprob(v):
+        '''
+        '''
         lp = lnprior(v)
         if not np.isfinite(lp):
             return -np.inf
@@ -273,6 +291,8 @@ def RunMCMC2(s, eta, d0, theta, a, b, c, e, ind, output_directory, filename):
 
 
 def MCMC2_Parallel(s, eta, theta, output_directory, filename):
+    '''
+    '''
     alpha_first = []
     beta_first = []
     phi_first = []
@@ -361,7 +381,11 @@ def MCMC2_Parallel(s, eta, theta, output_directory, filename):
 
 
 def Annealing1(eta, s, theta, alpha0, beta0, phi0, xi0, d0, a, b, c, e, ind, output_directory, filename):
+    '''
+    '''
     def f(x):
+        '''
+        '''
         alpha, beta, phi, xi, d = x
         return ((((s *
                    np.sin(eta)) /
@@ -443,6 +467,8 @@ def Annealing1(eta, s, theta, alpha0, beta0, phi0, xi0, d0, a, b, c, e, ind, out
 
 
 def Annealing1_Parallel(s, eta, theta, output_directory, filename):
+    '''
+    '''
     alpha_MCMC2 = []
     beta_MCMC2 = []
     phi_MCMC2 = []
@@ -571,7 +597,11 @@ def Annealing1_Parallel(s, eta, theta, output_directory, filename):
 
 
 def Annealing2(eta, s, theta, alpha0, beta0, phi0, xi0, d0, a, b, c, e, ind, output_directory, filename):
+    '''
+    '''
     def f(x):
+        '''
+        '''
         alpha, beta, phi, xi, d = x
         return ((((s *
                    np.sin(eta)) /
@@ -653,6 +683,8 @@ def Annealing2(eta, s, theta, alpha0, beta0, phi0, xi0, d0, a, b, c, e, ind, out
 
 
 def Annealing2_Parallel(s, eta, theta, output_directory, filename):
+    '''
+    '''
     alpha_ANNE1 = []
     beta_ANNE1 = []
     phi_ANNE1 = []
@@ -782,6 +814,8 @@ def Annealing2_Parallel(s, eta, theta, output_directory, filename):
 
 
 def Convert_Results_Cartesian(s, eta, theta, output_directory, filename):
+    '''
+    '''
     x_coordinates = []
     y_coordinates = []
     z_coordinates = []
