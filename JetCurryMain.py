@@ -99,7 +99,7 @@ if ARGS.out_dir is not None:
 else:
     ARGS.out_dir = os.getcwd()
 
-OUTPUT_DIRECTORY = ARGS.out_dir + '/'
+OUTPUT_DIRECTORY_DEFAULT = ARGS.out_dir + '/'
 
 np.seterr(all='ignore')
 S = []
@@ -111,7 +111,7 @@ THETA = 0.261799388
 for file in FILES:
     filename = os.path.splitext(file)[0]
     filename = os.path.basename(filename)
-    OUTPUT_DIRECTORY = OUTPUT_DIRECTORY + filename + '/'
+    OUTPUT_DIRECTORY = OUTPUT_DIRECTORY_DEFAULT + filename + '/'
     if not os.path.exists(OUTPUT_DIRECTORY):
         os.makedirs(OUTPUT_DIRECTORY)
 
@@ -166,3 +166,4 @@ for file in FILES:
     ax.invert_yaxis()
     # plt.show()
     plt.savefig(OUTPUT_DIRECTORY + filename + '_sim.png')
+    plt.clf()
