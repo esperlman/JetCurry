@@ -55,13 +55,36 @@ def imagesqrt(image, scale_min, scale_max):
 
 
 def Find_MaxFlux(file1, Upstream_Bounds, Downstream_Bounds, number_of_points):
+    '''
+    Calculates the max along each column
+
+    Arguments:
+        file1 : numpy array
+            Sqrt image of FITS file
+        Upstream_Bounds : numpy array
+            Start position of jet
+        Downstream_Bounds : numpy array
+            End position of jet
+        number_of_points : numpy integer
+            Number of pixels along x-axis of the start and end positions of jet
+
+    Returns:
+        intensity_xpos : numpy array
+            Max intensity at point x
+        intensity_ypos : numpy array
+            Max intensity at point y
+        x_smooth : numpy array
+            Returns number_of_points evenly spaced samples
+                calculated over the start/stop interval
+        y_smooth : numpy array
+            Interpolate a curve using spline fit
+        intensity_max : numpy array
+            Max intensity of each column
+    '''
     height, width = file1.shape
-    intensity_max = []
-    intensity_ypos = []
-    intensity_xpos = []
-    # intensity_max = np.array([])
-    # intensity_ypos = np.array([])
-    # intensity_xpos = np.array([])
+    intensity_max = np.array([])
+    intensity_ypos = np.array([])
+    intensity_xpos = np.array([])
     temp = np.zeros(shape=(height, 1))
     for k in range(Upstream_Bounds[0], Downstream_Bounds[0] - 1):
         for j in range(0, height - 1):
@@ -69,37 +92,48 @@ def Find_MaxFlux(file1, Upstream_Bounds, Downstream_Bounds, number_of_points):
             temp[j] = pixel
         pixel_max = np.nanmax(temp)
         position = [i for i, j in enumerate(temp) if j == pixel_max]
-        intensity_max.append(pixel_max)
-        intensity_ypos.append(position[0])
-        intensity_xpos.append(k)
-        # intensity_max = np.append(intensity_max, pixel_max)
-        # intensity_ypos = np.append(intensity_ypos, position[0])
-        # intensity_xpos = np.append(intensity_xpos, k)
-    intensity_max = np.array(intensity_max)
-    intensity_ypos = np.array(intensity_ypos)
-    intensity_xpos = np.array(intensity_xpos)
-    x = intensity_xpos
-    y = intensity_ypos
+        intensity_max = np.append(intensity_max, pixel_max)
+        intensity_ypos = np.append(intensity_ypos, position[0])
+        intensity_xpos = np.append(intensity_xpos, k)
     x_smooth = np.linspace(
         Upstream_Bounds[0],
         Downstream_Bounds[0],
         num=number_of_points)
-    y_smooth = spline(x, y, x_smooth)
-    return x, y, x_smooth, y_smooth, intensity_max
+    y_smooth = spline(intensity_xpos, intensity_ypos, x_smooth)
+    return intensity_xpos, intensity_ypos, x_smooth, y_smooth, intensity_max
 
 
 def Calculate_s_and_eta(x_smooth, y_smooth, core_points, output_directory, filename):
     '''
+    Calculates S and ETA values
+
+    Arguments:
+        x_smooth : numpy array
+            Evenly spaced samples
+        y_smooth : numpy array
+            Interpolate a curve using spline fit
+        core_points : numpy array
+            Start position of jet
+        output_directory : string
+            Path of location to save data products
+        filename : string
+            Root name of file to be saved
+
+    Returns:
+        s: list
+        eta: list
     '''
     s = []
     eta = []
+
     for i in range(len(x_smooth)):
-        x = x_smooth[i] - float(core_points[1])
-        y = y_smooth[i] - float(core_points[0])
+        x = x_smooth[i] - float(core_points[1])  # default core_points[1]
+        y = y_smooth[i] - float(core_points[0])  # default core_points[0]
         s_value = (x**2 + y**2)**(0.5)
         eta_value = math.atan(y / x)
         s.append(s_value)
         eta.append(eta_value)
+
     with open(output_directory + filename + '_parameters.txt', 'w') as file:
         for x in range(len(x_smooth)):
             file.write(str(s[x]) + '\t' + str(eta[x]) + '\t' +
@@ -188,14 +222,17 @@ def MCMC1_Parallel(s, eta, theta, output_directory, filename):
         r = Process(target=Run_MCMC1, args=(s[i], eta[i], theta, i, output_directory, filename))
         r.start()
         r.join()
+
         r1 = Process(target=Run_MCMC1, args=(
             s[i + 1], eta[i + 1], theta, i + 1, output_directory, filename))
         r1.start()
         r1.join()
+
         r2 = Process(target=Run_MCMC1, args=(
             s[i + 2], eta[i + 2], theta, i + 2, output_directory, filename))
         r2.start()
         r2.join()
+
         r3 = Process(target=Run_MCMC1, args=(
             s[i + 3], eta[i + 3], theta, i + 3, output_directory, filename))
         r3.start()
@@ -379,10 +416,10 @@ def MCMC2_Parallel(s, eta, theta, output_directory, filename):
         h3.join()
     return
 
-
 def Annealing1(eta, s, theta, alpha0, beta0, phi0, xi0, d0, a, b, c, e, ind, output_directory, filename):
     '''
     '''
+
     def f(x):
         '''
         '''
@@ -595,10 +632,10 @@ def Annealing1_Parallel(s, eta, theta, output_directory, filename):
         q3.join()
     return
 
-
 def Annealing2(eta, s, theta, alpha0, beta0, phi0, xi0, d0, a, b, c, e, ind, output_directory, filename):
     '''
     '''
+
     def f(x):
         '''
         '''
@@ -680,7 +717,7 @@ def Annealing2(eta, s, theta, alpha0, beta0, phi0, xi0, d0, a, b, c, e, ind, out
                    '\t' +
                    str(ind) +
                    '\n')
-
+    return
 
 def Annealing2_Parallel(s, eta, theta, output_directory, filename):
     '''

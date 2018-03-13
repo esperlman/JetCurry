@@ -32,7 +32,6 @@ import JetCurryGui
 
 # Required modules
 MODULES = ['emcee',
-           'corner',
            'multiprocessing',
            'scipy',
            'numpy',
@@ -99,7 +98,10 @@ if ARGS.out_dir is not None:
 else:
     ARGS.out_dir = os.getcwd()
 
-OUTPUT_DIRECTORY_DEFAULT = ARGS.out_dir + '/'
+if ARGS.out_dir[-1] == '/':
+    OUTPUT_DIRECTORY_DEFAULT = ARGS.out_dir
+else:
+    OUTPUT_DIRECTORY_DEFAULT = ARGS.out_dir + '/'
 
 np.seterr(all='ignore')
 S = []
@@ -150,6 +152,7 @@ for file in FILES:
 
     S, ETA = jet.Calculate_s_and_eta(
         x_smooth, y_smooth, UPSTREAM_BOUNDS, OUTPUT_DIRECTORY, filename)
+
     # Run the First MCMC Trial in Parallel
     jet.MCMC1_Parallel(S, ETA, THETA, OUTPUT_DIRECTORY, filename)
     jet.MCMC2_Parallel(S, ETA, THETA, OUTPUT_DIRECTORY, filename)

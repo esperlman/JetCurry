@@ -26,7 +26,7 @@ python JetCurryMain.py input [-out_dir]
 
 ## Notes
 
-A GUI will display the FITS image. Click on the image with your left mouse button to choose the upstream bounds starting point and right click to choose the downstream bounds. You may continuously click on the image until you are satisifed with the regions of interest. Once satisifed, click the Run button to process the data.
+A GUI will display the FITS image. Click on the image with your left mouse button to choose the upstream bounds starting point and right click to choose the downstream bounds. You may continuously click on the image until you are satisifed with the regions of interest. These values can also be entered by typing. Once satisifed, click the Run button to process the data.
 
 Data products are organized by the FITS filename. For example, if the output directory is /foo/bar and the filename is KnotD_Radio.fits, then data products will be saved to /foo/bar/KnotD_Radio. 
 
