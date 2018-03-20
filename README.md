@@ -1,30 +1,35 @@
-JetCurry, Copyright 2017. Katie Kosak. Eric Perlman. 
-Copyright Details: GPL.txt 
+# Jet Curry
+
+Models the 3D geometry of AGN jets.
+
+JetCurry, Copyright 2017. Katie Kosak. Eric Perlman. Copyright Details: GPL.txt
+
+Last Edited: March 2018. Questions: Contact Katie Kosak,  [katie.kosak@gmail.com](mailto:katie.kosak@gmail.com)
 
 
-Last Edited: March 2017. Questions: Contact Katie Kosak, katie.kosak@gmail.com
+## Usage
 
-Python code that models the 3D geometry of AGN jets
+python JetCurryMain.py input [-out_dir] 
 
-Make sure the files are in the same directory.
+**Required arguments**
 
-Jet_Curry has the functions for performing the calculation from 2D to 3D. There is no need to change this code to perform calculations. It is best not to mess around with this code.
+**input**: a single FITS file or directory (full or relative path) 
 
-Jet_Curry_Main is the code that the user will use to define the fits file, define the core location, etc.
+**Optional arguments** 
 
-To call in the tools used from Jet_Curry, the following command is used:
+**-out\_dir**: full or relative path to save output files.  Output directory is created if it doesn't exist. Default output is current working directory if -out\_dir is not specified. 
 
-import Jet_Curry as jet
+**Example**
+> python JetCurryMain.py ./KnotD\_Radio.fits
 
-To use the functions necessary for the calculations, use the following:
+>  python JetCurryMain.py ./data -out_dir /foo/bar/
 
-jet.Find_MaxFlux(file1,Upstream_Bounds,number_of_points)
+## Notes
 
-To execute the code, execute the Jet_Curry_Main.py code as a normal Python code. If the Jet_Curry.pyc file is in the same directory as Jet_Curry_Main, the functions will be automatically imported.
+A GUI will display the FITS image. Click on the image with your left mouse button to choose the upstream bounds starting point and right click to choose the downstream bounds. You may continuously click on the image until you are satisifed with the regions of interest. These values can also be entered by typing. Once satisifed, click the Run button to process the data.
 
-where jet tells the code to pull the function from the code Jet_Curry. Find_MaxFlux is the function in Jet_Curry being called.
+Data products are organized by the FITS filename. For example, if the output directory is /foo/bar and the filename is KnotD_Radio.fits, then data products will be saved to /foo/bar/KnotD_Radio. 
 
-For the functions in Jet_Curry, all arguments must be included as the example.
+## TODO
 
-To use the Jet_Curry Visualization with VPython, Recommend using Jupyter's IPython Notebooks.
-
+Optimize with cython or numba.
